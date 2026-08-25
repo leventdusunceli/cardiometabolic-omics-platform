@@ -381,6 +381,9 @@ items unless explicitly asked, and keep each chunk small enough to explain clear
   - `tests/test_config.py` — two tests covering `Settings` defaults and env-var override.
   - Verified locally in a throwaway venv (no `uv`/`docker` installed on this machine): `ruff
     check`, `ruff format --check`, `mypy` (strict), and `pytest` all pass clean.
+  - Committed as two commits (`feat: scaffold repo ...`, `docs: add project spec, progress
+    tracker, git conventions`) and pushed to `origin/main` at
+    https://github.com/leventdusunceli/cardiometabolic-omics-platform.
 
 **Deliberate deviations / decisions made (not dictated verbatim by Section 13, filled in during
   build):**
