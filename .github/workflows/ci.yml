@@ -34,3 +34,18 @@ jobs:
 
       - name: Test (pytest)
         run: uv run pytest --cov=cmo_platform
+
+  docker-compose-smoke-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: docker compose up (fails unless all services report healthy)
+        run: docker compose up -d --wait
+
+      - name: Show service status
+        run: docker compose ps
+
+      - name: docker compose down
+        if: always()
+        run: docker compose down -v
