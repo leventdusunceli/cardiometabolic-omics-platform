@@ -10,9 +10,6 @@ htmlcov/
 .venv/
 venv/
 
-# uv
-.python-version
-
 # Env / secrets
 .env
 
