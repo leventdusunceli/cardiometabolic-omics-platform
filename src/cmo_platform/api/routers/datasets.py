@@ -1,4 +1,4 @@
-"""GET /datasets — list ingested datasets with provenance (CLAUDE.md Section 9)."""
+"""GET /datasets — list ingested datasets with provenance."""
 
 from __future__ import annotations
 
