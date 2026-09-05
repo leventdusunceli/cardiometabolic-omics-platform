@@ -20,6 +20,7 @@ class DatasetOut(BaseModel):
     license: str | None
     ingestion_date: dt.datetime
 
+
 class ExpressionValueOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
@@ -28,3 +29,7 @@ class ExpressionValueOut(BaseModel):
     gene_symbol: str
     normalized_value: float
     unit: str
+
+
+class TaskSubmission(BaseModel):
+    task_id: str
