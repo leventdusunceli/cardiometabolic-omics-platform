@@ -11,23 +11,24 @@ from cmo_platform.db.models import ExpressionValue, Gene, Sample
 
 router = APIRouter(tags=["expression"])
 
+
 @router.get(
     "/tissues/{tissue}/genes/{gene}/expression",
     response_model=list[ExpressionValueOut],
 )
 def get_gene_expression(
-    tissue: str, 
-    gene: str, 
-    condition: str|None=None,
-    db :Session=Depends(get_db),
-) -> list[ExpressionValueOut]: 
+    tissue: str,
+    gene: str,
+    condition: str | None = None,
+    db: Session = Depends(get_db),
+) -> list[ExpressionValueOut]:
     query = (
-        db.query(ExpressionValue,Sample,Gene)
-        .join(Sample,ExpressionValue.sample_id==Sample.id)
-        .join(Gene,ExpressionValue.gene_id ==Gene.ensembl_gene_id)
+        db.query(ExpressionValue, Sample, Gene)
+        .join(Sample, ExpressionValue.sample_id == Sample.id)
+        .join(Gene, ExpressionValue.gene_id == Gene.ensembl_gene_id)
         .filter(Sample.tissue == tissue, Gene.symbol == gene)
     )
-    if condition is not None: 
+    if condition is not None:
         query = query.filter(Sample.condition == condition)
 
     rows = query.all()
@@ -45,5 +46,5 @@ def get_gene_expression(
             normalized_value=ev.normalized_value,
             unit=ev.unit,
         )
-        for ev,sample,gene_row in rows
+        for ev, sample, gene_row in rows
     ]
