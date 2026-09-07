@@ -31,6 +31,17 @@ class Sex(enum.StrEnum):
     UNKNOWN = "unknown"
 
 
+class ConditionCategory(enum.StrEnum):
+    """Controlled vocabulary for cohorts, distinct from the free-text
+    column, created because the GEO datasets don't share cohort classifications
+    """
+
+    CONTROL = "control"
+    CASE = "case"
+    EXCLUDED = "excluded"
+    BASELINE = "baseline"
+
+
 class AnalysisType(enum.StrEnum):
     DIFFERENTIAL_EXPRESSION = "differential_expression"
     ENRICHMENT = "enrichment"
@@ -94,6 +105,9 @@ class Sample(Base):
     dataset_id: Mapped[int] = mapped_column(ForeignKey("datasets.id"), index=True)
     tissue: Mapped[str] = mapped_column(String(128), index=True)
     condition: Mapped[str] = mapped_column(String(128), index=True)
+    condition_category: Mapped[ConditionCategory] = mapped_column(
+        _str_enum(ConditionCategory), index=True
+    )
     age_bracket: Mapped[str | None] = mapped_column(String(32))
     sex: Mapped[Sex | None] = mapped_column(_str_enum(Sex))
     bmi_category: Mapped[str | None] = mapped_column(String(32))
