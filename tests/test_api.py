@@ -8,6 +8,7 @@ from cmo_platform.api.dependencies import get_db
 from cmo_platform.api.main import app
 from cmo_platform.db.base import Base
 from cmo_platform.db.models import (
+    ConditionCategory,
     Dataset,
     DatasetSource,
     ExpressionUnit,
@@ -33,7 +34,12 @@ def client():
         assay_type="bulk RNA-seq",
         citation="GTEx Consortium, https://gtexportal.org",
     )
-    sample = Sample(dataset=dataset, tissue="Liver", condition="population_baseline")
+    sample = Sample(
+        dataset=dataset,
+        tissue="Liver",
+        condition="population_baseline",
+        condition_category=ConditionCategory.BASELINE,
+    )
     gene = Gene(ensembl_gene_id="ENSG00000132693", symbol="CRP")
     session.add_all([dataset, sample, gene])
     session.flush()

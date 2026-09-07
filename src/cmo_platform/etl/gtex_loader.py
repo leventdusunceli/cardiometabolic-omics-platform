@@ -9,6 +9,7 @@ from __future__ import annotations
 from sqlalchemy.orm import Session
 
 from cmo_platform.db.models import (
+    ConditionCategory,
     Dataset,
     DatasetSource,
     ExpressionUnit,
@@ -72,6 +73,7 @@ def load_to_warehouse(
             dataset=dataset,
             tissue=tissue_site_detail_id,
             condition=GTEX_BASELINE_CONDITION,
+            condition_category=ConditionCategory.BASELINE,
             qc_metrics=qc_metrics or {
                 "aggregation": "population_median",
                 "source": "gtex_median_gene_expression",

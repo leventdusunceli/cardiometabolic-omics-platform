@@ -7,6 +7,7 @@ from cmo_platform.db.base import Base
 from cmo_platform.db.models import (
     AnalysisRun,
     AnalysisType,
+    ConditionCategory,
     CrosstalkModule,
     CrosstalkModuleGene,
     Dataset,
@@ -37,7 +38,12 @@ def test_dataset_sample_gene_expression_round_trip(session: Session) -> None:
         assay_type="bulk RNA-seq",
     )
     gene = Gene(ensembl_gene_id="ENSG00000141510", symbol="TP53")
-    sample = Sample(dataset=dataset, tissue="Liver", condition="control")
+    sample = Sample(
+        dataset=dataset,
+        tissue="Liver",
+        condition="control",
+        condition_category=ConditionCategory.CONTROL,
+    )
     expression = ExpressionValue(
         sample=sample, gene=gene, normalized_value=12.3, unit=ExpressionUnit.TPM
     )
@@ -58,7 +64,12 @@ def test_expression_value_unique_per_sample_gene(session: Session) -> None:
         assay_type="bulk RNA-seq",
     )
     gene = Gene(ensembl_gene_id="ENSG00000141510", symbol="TP53")
-    sample = Sample(dataset=dataset, tissue="Liver", condition="control")
+    sample = Sample(
+        dataset=dataset,
+        tissue="Liver",
+        condition="control",
+        condition_category=ConditionCategory.CONTROL,
+    )
     session.add_all(
         [
             dataset,
