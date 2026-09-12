@@ -100,6 +100,11 @@ class Sample(Base):
     """One biological sample (donor/tissue/condition) within a dataset."""
 
     __tablename__ = "samples"
+    __table_args__ = (
+        UniqueConstraint(
+            "dataset_id", "source_sample_id", name="uq_sample_dataset_source_sample_id"
+        ),
+    )
 
     id: Mapped[int] = mapped_column(primary_key=True)
     dataset_id: Mapped[int] = mapped_column(ForeignKey("datasets.id"), index=True)
@@ -111,8 +116,8 @@ class Sample(Base):
     age_bracket: Mapped[str | None] = mapped_column(String(32))
     sex: Mapped[Sex | None] = mapped_column(_str_enum(Sex))
     bmi_category: Mapped[str | None] = mapped_column(String(32))
-    # Heterogeneous per-dataset QC fields (library size, detected-gene count, etc.); kept as
-    # JSON rather than fixed columns since GTEx and each GEO series report different metrics.
+    # only populated for GEO datasets with per-donor accessions
+    source_sample_id: Mapped[str | None] = mapped_column(String(64))
     qc_metrics: Mapped[dict[str, Any] | None] = mapped_column(JSON)
 
     dataset: Mapped[Dataset] = relationship(back_populates="samples")
@@ -125,7 +130,7 @@ class Gene(Base):
     __tablename__ = "genes"
 
     ensembl_gene_id: Mapped[str] = mapped_column(String(32), primary_key=True)
-    symbol: Mapped[str] = mapped_column(String(64), index=True)
+    symbol: Mapped[str | None ] = mapped_column(String(64), index=True)
     biotype: Mapped[str | None] = mapped_column(String(64))
     chromosome: Mapped[str | None] = mapped_column(String(16))
 
