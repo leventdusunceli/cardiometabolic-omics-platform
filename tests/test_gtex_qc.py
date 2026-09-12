@@ -1,5 +1,5 @@
 from cmo_platform.etl.gtex_client import GtexMedianExpression
-from cmo_platform.etl.qc import qc_and_normalize
+from cmo_platform.etl.gtex_qc import qc_and_normalize
 
 
 def _record(**overrides: object) -> GtexMedianExpression:

@@ -13,7 +13,7 @@ from sqlalchemy.orm import Session, sessionmaker
 from cmo_platform.db.base import SessionLocal
 from cmo_platform.etl.gtex_client import GtexMedianExpression, fetch_gtex_tissue
 from cmo_platform.etl.gtex_loader import load_to_warehouse
-from cmo_platform.etl.qc import qc_and_normalize
+from cmo_platform.etl.gtex_qc import qc_and_normalize
 
 logger = logging.getLogger(__name__)
 
