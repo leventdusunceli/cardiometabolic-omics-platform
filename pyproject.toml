@@ -18,6 +18,7 @@ dependencies = [
     "prefect>=3.8.4",
     "celery>=5.6.3",
     "pandas>=3.0.5",
+    "pydeseq2>=0.5.4",
 ]
 
 [dependency-groups]
@@ -56,6 +57,11 @@ extend-immutable-calls = ["fastapi.Depends", "fastapi.Query", "fastapi.Path", "f
 python_version = "3.12"
 strict = true
 files = ["src"]
+
+[[tool.mypy.overrides]]
+# pydeseq2 ships no stubs and no py.typed marker.
+module = "pydeseq2.*"
+ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
