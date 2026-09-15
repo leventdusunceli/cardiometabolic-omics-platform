@@ -67,8 +67,9 @@ def qc_filter_samples(
     }
     return kept_counts, kept_samples, batch_summary
 
-def normalize_counts_deseq2(counts: pd.DataFrame) -> tuple[pd.DataFrame,pd.Series]: 
-    """DESeq2 median-of-ratios normalization. 
+
+def normalize_counts_deseq2(counts: pd.DataFrame) -> tuple[pd.DataFrame, pd.Series]:
+    """DESeq2 median-of-ratios normalization.
 
     Returns (normalized_counts,size_factors), both indexed the same way as 'counts'
     """
@@ -77,6 +78,7 @@ def normalize_counts_deseq2(counts: pd.DataFrame) -> tuple[pd.DataFrame,pd.Serie
     dds.fit_size_factors()
 
     normalized_counts = pd.DataFrame(
-        dds.layers['normed_counts'], index = counts.index, columns = counts.columns)
-    size_factors: pd.Series = dds.obs['size_factos']
+        dds.layers["normed_counts"], index=counts.index, columns=counts.columns
+    )
+    size_factors: pd.Series = dds.obs["size_factors"]
     return normalized_counts, size_factors
