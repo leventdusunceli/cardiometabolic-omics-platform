@@ -3,7 +3,7 @@ from sqlalchemy.orm import sessionmaker
 
 from cmo_platform.db.base import Base
 from cmo_platform.db.models import ExpressionValue, Sample
-from cmo_platform.etl import flows
+from cmo_platform.etl import gtex_flows as flows
 from cmo_platform.etl.gtex_client import GtexMedianExpression
 
 
