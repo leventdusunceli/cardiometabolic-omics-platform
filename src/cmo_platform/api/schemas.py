@@ -29,7 +29,3 @@ class ExpressionValueOut(BaseModel):
     gene_symbol: str
     normalized_value: float
     unit: str
-
-
-class TaskSubmission(BaseModel):
-    task_id: str

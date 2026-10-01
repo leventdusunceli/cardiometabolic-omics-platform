@@ -1,6 +1,7 @@
-"""Celery tasks. `ping` is a placeholder proving the queue is wired correctly end to end;
-real analysis tasks (run_differential_expression, etc.) land once GEO
-ingestion provides data to analyze."""
+"""Functions for executing analysis and recording it in analysis_runs
+
+Called by Celery flows. Allows the system to have a provenance feature
+"""
 
 from __future__ import annotations
 
@@ -8,6 +9,7 @@ import datetime as dt
 import logging
 
 from sqlalchemy import insert
+from sqlalchemy.orm import Session, sessionmaker
 
 from cmo_platform.analysis.differential_expression import (
     load_case_control_matrix,
@@ -21,37 +23,34 @@ from cmo_platform.db.models import (
     DifferentialExpressionResult,
     TriggeredVia,
 )
-from cmo_platform.worker.celery_app import celery_app
 
 logger = logging.getLogger(__name__)
 
-
-@celery_app.task(name="cmo_platform_ping")
-def ping(message: str = "pong") -> str:
-    logger.info("ping task receieved: %s", message)
-    return message
+DE_INSERT_CHUNK_SIZE = 5_000
 
 
-@celery_app.task(name="cmo_platform_run_differential_expression")
-def run_differential_expression(tissue: str, triggered_via: str = "api") -> int:
-    """Celery task for performing DE analysis for one tissue's CASE vs CONTROL using
-    the run_deseq2_differential_expression method within the /cmo_platform/analysis pipeline
+def run_differential_expression_for_tissue(
+    tissue: str,
+    triggered_via: TriggeredVia,
+    session_factory: sessionmaker[Session] = SessionLocal,
+) -> int:
+    """Run pydeseq2 DE for one tissue's CASE vs CONTROL samples and return the analysis_run_id.
 
-    This celery task also records the run status into the analysis_runs table within the database.
-    Allows us to trace back each initiated run and see the run parameters.
+    The AnalysisRun row is committed as RUNNING before the fit starts, so a crash mid-fit still
+    leaves a durable FAILED record. Results are a plain bulk insert
     """
-    session = SessionLocal()
+    session = session_factory()
     analysis_run = AnalysisRun(
         type=AnalysisType.DIFFERENTIAL_EXPRESSION,
         parameters={"tissue": tissue},
         status=AnalysisStatus.RUNNING,
-        triggered_via=TriggeredVia(triggered_via),
+        triggered_via=triggered_via,
     )
     session.add(analysis_run)
     session.commit()
     analysis_run_id: int = analysis_run.id
     logger.info(
-        "run_differential_expression started: tissue=%s analysis_run_id=%d", tissue, analysis_run_id
+        "differential expression started: tissue=%s analysis_run_id=%d", tissue, analysis_run_id
     )
 
     try:
@@ -69,10 +68,10 @@ def run_differential_expression(tissue: str, triggered_via: str = "api") -> int:
             }
             for gene_id, row in results.iterrows()
         ]
-        chunk_size = 5_000
-        for start in range(0, len(records), chunk_size):
+        for start in range(0, len(records), DE_INSERT_CHUNK_SIZE):
             session.execute(
-                insert(DifferentialExpressionResult), records[start : start + chunk_size]
+                insert(DifferentialExpressionResult),
+                records[start : start + DE_INSERT_CHUNK_SIZE],
             )
 
         analysis_run.status = AnalysisStatus.COMPLETED
@@ -84,7 +83,7 @@ def run_differential_expression(tissue: str, triggered_via: str = "api") -> int:
         analysis_run.completed_at = dt.datetime.now(dt.UTC)
         session.commit()
         logger.exception(
-            "run_differential_expression failed: tissue=%s analysis_run_id=%d",
+            "differential expression failed: tissue=%s analysis_run_id=%d",
             tissue,
             analysis_run_id,
         )
@@ -93,7 +92,7 @@ def run_differential_expression(tissue: str, triggered_via: str = "api") -> int:
         session.close()
 
     logger.info(
-        "run_differential_expression completed: tissue=%s analysis_run_id=%d genes=%d",
+        "differential expression completed: tissue=%s analysis_run_id=%d genes=%d",
         tissue,
         analysis_run_id,
         len(records),
