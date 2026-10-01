@@ -40,3 +40,28 @@ def test_ingest_gtex_tissue_is_idempotent(monkeypatch):
         assert session.query(ExpressionValue).count() == 1
     finally:
         session.close()
+
+def test_ingest_gtex_tissue_loads_only_qc_passing_records(monkeypatch):
+    def fake_records_with_one_bad(tissue: str) -> list[GtexMedianExpression]:
+        good = _fake_records(tissue)[0]
+        bad = GtexMedianExpression(
+            gencode_id="ENSG00000118137.10",
+            gene_symbol="APOA1",
+            tissue_site_detail_id=tissue,
+            median=-1.0,
+            unit="TPM",
+            ontology_id="UBERON:0001114",
+            dataset_id="gtex_v8",
+        )
+        return [good, bad]
+
+    monkeypatch.setattr(flows, "fetch_gtex_tissue", fake_records_with_one_bad)
+    session_factory = _sqlite_session_factory()
+
+    flows.ingest_gtex_tissue("Liver", session_factory=session_factory)
+
+    session = session_factory()
+    try:
+        assert session.query(ExpressionValue).count() == 1
+    finally:
+        session.close()
