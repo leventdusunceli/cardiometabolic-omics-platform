@@ -1,6 +1,6 @@
 """Functions for executing analysis and recording it in analysis_runs
 
-Called by Celery flows. Allows the system to have a provenance feature
+Called by Prefect flows. Allows the system to have a provenance feature
 """
 
 from __future__ import annotations
