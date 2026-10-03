@@ -130,7 +130,7 @@ class Gene(Base):
     __tablename__ = "genes"
 
     ensembl_gene_id: Mapped[str] = mapped_column(String(32), primary_key=True)
-    symbol: Mapped[str | None ] = mapped_column(String(64), index=True)
+    symbol: Mapped[str | None] = mapped_column(String(64), index=True)
     biotype: Mapped[str | None] = mapped_column(String(64))
     chromosome: Mapped[str | None] = mapped_column(String(16))
 

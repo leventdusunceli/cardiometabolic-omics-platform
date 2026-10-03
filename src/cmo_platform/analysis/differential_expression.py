@@ -1,4 +1,4 @@
-"""Differential expression analysis script. Methods read 
+"""Differential expression analysis script. Methods read
 a tissue's CASE/CONTROL data from the Postgres database. Then
 runs pydeseq2 statistical DE model against it.
 
@@ -16,7 +16,7 @@ from sqlalchemy.orm import Session
 from cmo_platform.db.models import ConditionCategory, ExpressionValue, Sample
 
 
-def load_case_control_matrix(tissue:str, session:Session)->tuple[pd.DataFrame, pd.Series]:
+def load_case_control_matrix(tissue: str, session: Session) -> tuple[pd.DataFrame, pd.Series]:
     """Returns (raw counts. condition_category) for one tissue's CASE/CONTROL samples
     pydeseq2 requires raw counts as input and not normalized counts.
     """
@@ -37,18 +37,19 @@ def load_case_control_matrix(tissue:str, session:Session)->tuple[pd.DataFrame, p
 
     long = pd.DataFrame(rows, columns=["sample_id", "gene_id", "raw_count", "condition_category"])
     counts = long.pivot(index="sample_id", columns="gene_id", values="raw_count")
-    condition_category = (
-        long.drop_duplicates("sample_id").set_index("sample_id")["condition_category"]
-    )
+    condition_category = long.drop_duplicates("sample_id").set_index("sample_id")[
+        "condition_category"
+    ]
     return counts, condition_category
 
+
 def run_deseq2_differential_expression(
-        counts: pd.DataFrame, condition_category:pd.Series
-)-> pd.DataFrame: 
-    """Fit pydeseq2;s DEseq2 model for a CASE vs CONTROL DE analysis. 
-    
-    Returns a DataFrame of Benjamin-Hochberg-corrected DE results. 
-    DataFrame is indexed by gene_id and has log2FoldCahnge, pvalue and 
+    counts: pd.DataFrame, condition_category: pd.Series
+) -> pd.DataFrame:
+    """Fit pydeseq2;s DEseq2 model for a CASE vs CONTROL DE analysis.
+
+    Returns a DataFrame of Benjamin-Hochberg-corrected DE results.
+    DataFrame is indexed by gene_id and has log2FoldCahnge, pvalue and
     Benjamin-Hochberg-corrected padj columns. There's also an additional filtering
     included, dropping genes with NaN padj values (genes with too low mean count)
     """
@@ -65,7 +66,6 @@ def run_deseq2_differential_expression(
     stats.summary()
 
     results: pd.DataFrame = stats.results_df[["log2FoldChange", "pvalue", "padj"]].dropna(
-    subset=["padj"]
+        subset=["padj"]
     )
     return results
-

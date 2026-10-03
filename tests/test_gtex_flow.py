@@ -41,6 +41,7 @@ def test_ingest_gtex_tissue_is_idempotent(monkeypatch):
     finally:
         session.close()
 
+
 def test_ingest_gtex_tissue_loads_only_qc_passing_records(monkeypatch):
     def fake_records_with_one_bad(tissue: str) -> list[GtexMedianExpression]:
         good = _fake_records(tissue)[0]

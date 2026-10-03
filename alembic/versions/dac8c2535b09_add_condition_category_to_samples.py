@@ -5,6 +5,7 @@ Revises: 57cab40aacf9
 Create Date: 2026-09-06 13:47:01.006012
 
 """
+
 from collections.abc import Sequence
 
 import sqlalchemy as sa
@@ -25,8 +26,12 @@ def upgrade() -> None:
         sa.Column(
             "condition_category",
             sa.Enum(
-                "CONTROL", "CASE", "EXCLUDED", "BASELINE",
-                name="conditioncategory", native_enum=False,
+                "CONTROL",
+                "CASE",
+                "EXCLUDED",
+                "BASELINE",
+                name="conditioncategory",
+                native_enum=False,
             ),
             nullable=True,
         ),

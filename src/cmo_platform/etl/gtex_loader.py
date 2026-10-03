@@ -41,7 +41,7 @@ def load_to_warehouse(
     records: list[GtexMedianExpression],
     session: Session,
     dataset_id: str = GTEX_DEFAULT_DATASET_ID,
-    qc_metrics: dict[str,object] | None = None,
+    qc_metrics: dict[str, object] | None = None,
 ) -> None:
     """Upsert one tissue's GTEx records into datasets/samples/genes/expression_values."""
     accession = f"{dataset_id}_{tissue_site_detail_id}"
@@ -74,7 +74,8 @@ def load_to_warehouse(
             tissue=tissue_site_detail_id,
             condition=GTEX_BASELINE_CONDITION,
             condition_category=ConditionCategory.BASELINE,
-            qc_metrics=qc_metrics or {
+            qc_metrics=qc_metrics
+            or {
                 "aggregation": "population_median",
                 "source": "gtex_median_gene_expression",
             },
@@ -83,7 +84,6 @@ def load_to_warehouse(
         session.flush()
     else:
         sample.qc_metrics = resolved_qc_metrics
-
 
     for record in records:
         gene_id = _strip_gencode_version(record.gencode_id)

@@ -11,4 +11,3 @@ app = FastAPI(title="Cardiometabolic Crosstalk Omics Platform API")
 
 app.include_router(datasets.router, prefix=settings.api_v1_prefix)
 app.include_router(expression.router, prefix=settings.api_v1_prefix)
-
