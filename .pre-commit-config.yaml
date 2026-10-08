@@ -1,14 +1,20 @@
+# Every hook runs the tool version pinned in uv.lock, so hooks and CI always agree.
 repos:
-  - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.7.4
+  - repo: local
     hooks:
       - id: ruff
-        args: [--fix]
+        name: ruff check
+        entry: uv run ruff check --fix
+        language: system
+        types_or: [python, pyi]
       - id: ruff-format
-
-  - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.13.0
-    hooks:
+        name: ruff format
+        entry: uv run ruff format
+        language: system
+        types_or: [python, pyi]
       - id: mypy
-        additional_dependencies: [pydantic-settings, pydantic]
-        files: ^src/
+        name: mypy
+        entry: uv run mypy
+        language: system
+        types: [python]
+        pass_filenames: false
