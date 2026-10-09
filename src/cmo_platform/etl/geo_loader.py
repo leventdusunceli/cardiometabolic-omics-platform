@@ -6,8 +6,6 @@ the loop logic of that script is not efficient for the dataset sizes we're loadi
 from __future__ import annotations
 
 import pandas as pd
-from sqlalchemy import insert
-from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.orm import Session
 
 from cmo_platform.db.models import (
@@ -20,6 +18,7 @@ from cmo_platform.db.models import (
     Sample,
     Sex,
 )
+from cmo_platform.db.upsert import bulk_upsert
 
 _SEX_BY_GENDER = {"male": Sex.MALE, "female": Sex.FEMALE}
 
@@ -76,13 +75,8 @@ def _upsert_samples(
 
 
 def _upsert_genes(gene_ids: list[str], session: Session) -> None:
-    """Ensure every id in `gene_ids` has a Gene row. New rows get symbol=None. Will be coupled later
-    on with an EnsemblID reference table for genes missing gene symbols.
-    """
-    existing = {row.ensembl_gene_id for row in session.query(Gene.ensembl_gene_id)}
-    missing = [gene_id for gene_id in gene_ids if gene_id not in existing]
-    if missing:
-        session.execute(insert(Gene), [{"ensembl_gene_id": gene_id} for gene_id in missing])
+    """Ensure every id in `gene_ids` has a Gene row. New rows get symbol=None."""
+    bulk_upsert(session, Gene, [{"ensembl_gene_id": g} for g in gene_ids], ["ensembl_gene_id"], [])
 
 
 def _upsert_expression_values(
@@ -95,6 +89,7 @@ def _upsert_expression_values(
     """Bulk upsert method for GEO data, different from the ORM logic for Gtex data
     due to inefficiencies arising from large GEO dataset size"""
 
+    # editing raw count matrix to fit our upsert schema
     raw_long = counts.stack()
     raw_long.index.names = ["accession", "gene_id"]
     normalized_long = normalized_counts.stack()
@@ -107,19 +102,15 @@ def _upsert_expression_values(
     records = rows[["sample_id", "gene_id", "raw_count", "normalized_value", "unit"]].to_dict(
         "records"
     )
-
-    for start in range(0, len(records), chunk_size):
-        batch = records[start : start + chunk_size]
-        stmt = pg_insert(ExpressionValue).values(batch)
-        stmt = stmt.on_conflict_do_update(
-            constraint="uq_expression_sample_gene",
-            set_={
-                "raw_count": stmt.excluded.raw_count,
-                "normalized_value": stmt.excluded.normalized_value,
-                "unit": stmt.excluded.unit,
-            },
-        )
-        session.execute(stmt)
+    # upsert gene expression while synching ensembl IDs with HGNC IDs
+    bulk_upsert(
+        session,
+        ExpressionValue,
+        records,
+        conflict_columns=["sample_id", "gene_id"],
+        update_columns=["raw_count", "normalized_value", "unit"],
+        chunk_size=chunk_size,
+    )
 
 
 def load_geo_dataset_to_warehouse(
