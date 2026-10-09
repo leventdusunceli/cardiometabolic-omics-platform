@@ -130,7 +130,7 @@ library file used.
 | Endpoint | Purpose | Status |
 | --- | --- | --- |
 | `GET /api/v1/datasets` | Ingested datasets with citation and provenance | Live |
-| `GET /api/v1/tissues/{tissue}/genes/{gene}/expression` | Expression of one gene in one tissue | Live (lookup by symbol; Ensembl ID lookup planned) |
+| `GET /api/v1/tissues/{tissue}/genes/{gene}/expression` | Expression of one gene in one tissue | Live (gene by symbol or Ensembl ID) |
 | `GET /api/v1/tissues/{tissue}/conditions` | Which groups exist and how many samples each | Planned |
 | `POST /api/v1/analyses` | Submit a DE or enrichment analysis on hosted data | Planned |
 | `GET /api/v1/analyses` | List analysis runs, filterable by type, tissue, status | Planned |
@@ -146,11 +146,12 @@ library file used.
 ## Current status
 
 - **Done:** scaffolding, CI, database schema; GTEx baseline for all four tissues; first API
-  endpoints; liver GEO dataset loaded and analyzed with `pydeseq2`.
+  endpoints; liver GEO dataset loaded and analyzed with `pydeseq2`; official gene names
+  (HGNC) for the `genes` table.
 - **In progress:** moving to the Postgres job list. RabbitMQ and Celery are removed; the liver
   pipeline (download, QC, normalization, load, `pydeseq2`) now runs end to end as one Prefect flow.
 
-- **Next:** job runner and analysis endpoints, pathway enrichment, the other three GEO tissues,
-  cross-tissue crosstalk analysis.
+- **Next:** job runner and analysis endpoints, the data load history (`ingestion_runs`), pathway
+  enrichment, the other three GEO tissues, cross-tissue crosstalk analysis.
 
 See `DATA_SOURCES.md` for the exact datasets used and their provenance.
