@@ -2,11 +2,11 @@
 
 Every dataset ingested by this platform, its provenance, and why it was chosen.
 
-## Tier A — cross-tissue baseline (GTEx)
+## Tier A:  cross-tissue baseline (GTEx)
 
 Used to build and validate the ingestion/database/API/orchestration architecture across four
 real tissues. GTEx carries no disease case/control labels, so it never feeds differential
-expression — its role is architectural and descriptive-reference only.
+expression. Its role is architectural and descriptive-reference only.
 
 | Field | Value |
 |---|---|
@@ -18,7 +18,7 @@ expression — its role is architectural and descriptive-reference only.
 | Citation | GTEx Consortium, https://gtexportal.org |
 | Why chosen | Four well-annotated tissues; Whole Blood used as a documented proxy for the bone-marrow/hematopoietic compartment. |
 
-## Tier B — disease signal (GEO)
+## Tier B: disease signal (GEO)
 
 Case/control bulk RNA-seq, one dataset per tissue.
 
@@ -59,7 +59,7 @@ Case/control bulk RNA-seq, one dataset per tissue.
 | Samples | 9: lean, obese, obese-hyperabsorptive |
 | License | Public |
 | Citation | PMID 41394425 |
-| Why chosen | Closest available human gut-tissue metabolic-phenotype RNA-seq dataset. Small n — treated as exploratory. |
+| Why chosen | Closest available human gut-tissue metabolic-phenotype RNA-seq dataset. Small n, so treated as exploratory. |
 
 ### Bone marrow / blood proxy
 
@@ -73,3 +73,19 @@ Case/control bulk RNA-seq, one dataset per tissue.
 | License | Public |
 | Citation | GSE153315 |
 | Why chosen | Direct, literal Type 2 Diabetes vs. healthy control labels; tissue matches the project's GTEx Whole Blood choice. |
+
+## Reference data
+
+### Gene annotation (HGNC)
+
+| Field | Value |
+|---|---|
+| Source | HGNC complete set, https://storage.googleapis.com/public-download-files/hgnc/tsv/tsv/hgnc_complete_set.txt |
+| Repository | HUGO Gene Nomenclature Committee (genenames.org) |
+| Organism | Homo sapiens |
+| Content | Official gene symbols with their Ensembl gene IDs; about 42,500 genes with an Ensembl ID |
+| Used for | Filling `genes.symbol`, `genes.biotype` and `genes.chromosome` by Ensembl ID |
+| License | CC0 (public domain) |
+| Citation | Seal RL et al., Genenames.org: the HGNC resources in 2023, Nucleic Acids Res 2023, PMID 36243972 |
+| Version | Downloaded at each pipeline run (file updated regularly by HGNC; first load: 2026-10-09) |
+| Notes | `biotype` holds HGNC's `locus_group` (protein-coding gene, non-coding RNA, pseudogene, other), not an Ensembl biotype. 486 of the 19,786 genes in the liver dataset are not in HGNC and keep no symbol. |
