@@ -26,6 +26,7 @@ class ExpressionValueOut(BaseModel):
 
     tissue: str
     condition: str
-    gene_symbol: str
+    ensembl_gene_id: str
+    gene_symbol: str | None
     normalized_value: float
     unit: str

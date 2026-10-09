@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy import or_
 from sqlalchemy.orm import Session
 
 from cmo_platform.api.dependencies import get_db
@@ -26,7 +27,7 @@ def get_gene_expression(
         db.query(ExpressionValue, Sample, Gene)
         .join(Sample, ExpressionValue.sample_id == Sample.id)
         .join(Gene, ExpressionValue.gene_id == Gene.ensembl_gene_id)
-        .filter(Sample.tissue == tissue, Gene.symbol == gene)
+        .filter(Sample.tissue == tissue, or_(Gene.symbol == gene, Gene.ensembl_gene_id == gene))
     )
     if condition is not None:
         query = query.filter(Sample.condition == condition)
@@ -42,6 +43,7 @@ def get_gene_expression(
         ExpressionValueOut(
             tissue=sample.tissue,
             condition=sample.condition,
+            ensembl_gene_id=gene_row.ensembl_gene_id,
             gene_symbol=gene_row.symbol,
             normalized_value=ev.normalized_value,
             unit=ev.unit,

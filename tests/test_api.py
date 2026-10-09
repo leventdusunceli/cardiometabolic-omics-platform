@@ -46,6 +46,15 @@ def client():
     session.add(
         ExpressionValue(sample=sample, gene=gene, normalized_value=5683.19, unit=ExpressionUnit.TPM)
     )
+    nameless_gene = Gene(ensembl_gene_id="ENSG00000000001")
+    session.add(nameless_gene)
+    session.flush()
+    session.add(
+        ExpressionValue(
+            sample=sample, gene=nameless_gene, normalized_value=1.5, unit=ExpressionUnit.TPM
+        )
+    )
+
     session.commit()
     session.close()
 
@@ -85,3 +94,17 @@ def test_get_gene_expression_not_found(client):
 def test_get_gene_expression_condition_filter_no_match(client):
     response = client.get("/api/v1/tissues/Liver/genes/CRP/expression?condition=disease")
     assert response.status_code == 404
+
+
+def test_get_gene_expression_by_ensembl_id(client):
+    response = client.get("/api/v1/tissues/Liver/genes/ENSG00000132693/expression")
+    assert response.status_code == 200
+    assert response.json()[0]["gene_symbol"] == "CRP"
+
+
+def test_get_gene_expression_for_gene_without_symbol(client):
+    response = client.get("/api/v1/tissues/Liver/genes/ENSG00000000001/expression")
+    assert response.status_code == 200
+    body = response.json()
+    assert body[0]["gene_symbol"] is None
+    assert body[0]["ensembl_gene_id"] == "ENSG00000000001"
